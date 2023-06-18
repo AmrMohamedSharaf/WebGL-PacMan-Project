@@ -135,35 +135,67 @@ function MoveUp(GameActor , map){
 		console.log("wall");
 	}
 	}
+
+	function MoveDown(GameActor , map){
+		if (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.not_visited){
+			GameActor.tileY--; 
+			map[GameActor.tileX][GameActor.tileY -1].setType(tilesEnum.visitd);
+			console.log("new point aquired")
+			return true;
+		}
+	
+		else if (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.visitd){
+			GameActor.tileY--; 
+			return false ;
+		}
+	
+		else if  (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.wall)  { 
+			console.log("wall");
+			return false;
+		}
+		}
+
+		function MoveRight(GameActor , map){
+			if (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.not_visited){
+				GameActor.tileX++; 
+				map[GameActor.tileX+1][GameActor.tileY].setType(tilesEnum.visitd);
+				console.log("new point aquired")
+				return true ; 
+			}
+		
+			else if (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.visitd){
+				GameActor.tileX++; 
+				return false;
+			}
+		
+			else if  (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.wall)  { 
+				console.log("wall");
+				return false;
+			}
+			}
+
+			function MoveLeft(GameActor , map){
+				if (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.not_visited){
+					GameActor.tileX--; 
+					map[GameActor.tileX-1][GameActor.tileY].setType(tilesEnum.visitd);
+					console.log("new point aquired")
+					return true;
+				}
+			
+				else if (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.visitd){
+					GameActor.tileX--; 
+					return false;
+				}
+			
+				else if  (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.wall)  { 
+					console.log("wall");
+					return false;
+				}
+				}
 	
 
 
-	function MoveDown(GameActor , map){
-		if(map[GameActor.tileY--].getType() === tilesEnum.wall){return}
-		else if (map[GameActor.tileY--].getType() === tilesEnum.not_visited){GameActor.tileY--;}
-		else {
-			map[GameActor.tileY--].setType(visitd);
-			GameActor.tileY--;
-		}
-		}
 
-		function MoveLeft(GameActor , map){
-			if(map[GameActor.tileX--].getType() === tilesEnum.wall){return}
-			else if (map[GameActor.tileX--].getType() === tilesEnum.not_visited){GameActor.tileX--;}
-			else {
-				map[GameActor.tileX--].setType(visitd);
-				GameActor.tileX--;
-			}
-			}
-
-			function MoveRight(GameActor , map){
-				if(map[GameActor.tileX++].getType() === tilesEnum.wall){return}
-				else if (map[GameActor.tileX++].getType() === tilesEnum.not_visited){GameActor.tileX++;}
-				else {
-					map[GameActor.tileX++].setType(visitd);
-					GameActor.tileX++;
-				}
-				}
 // ********************************
 
 
