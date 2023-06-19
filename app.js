@@ -12,6 +12,14 @@ const gameObjectTypes = {
 	player:3
 }
 
+
+const movmentDirections = {
+	up : 1,
+	down : -1 ,
+	left : -2 ,
+	right : 2 
+}
+
 class Tile { 
 	constructor(type, renderBufferData ){ 
 		this.type = type ;
@@ -31,6 +39,7 @@ class Tile {
 
 class GameActor{
 	constructor(type ,tileX, tileY , renderBufferData){
+		this.movmentdirection = 0;
 		this.type = type
 		this.tileX = tileX; 
 		this.tileY = tileY; 
@@ -44,6 +53,10 @@ class GameActor{
 
 	getYCords(){
 		return this.tileY;
+	}
+
+	getMovmentDirec(){
+		return this.movmentdirection;
 	}
 
 
@@ -121,13 +134,14 @@ function createNewGame(){
 function MoveUp(GameActor , map){
 	if (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.not_visited){
 		GameActor.tileY++; 
-		map[GameActor.tileX][GameActor.tileY + 1].setType(tilesEnum.visitd);
-		console.log("new point aquired")
+		map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
+		console.log("Moving Up") // debugging 
 		return;
 	}
 
 	else if (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.visitd){
 		GameActor.tileY++; 
+		console.log("Moving Up")
 		return;
 	}
 
@@ -139,12 +153,13 @@ function MoveUp(GameActor , map){
 	function MoveDown(GameActor , map){
 		if (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.not_visited){
 			GameActor.tileY--; 
-			map[GameActor.tileX][GameActor.tileY -1].setType(tilesEnum.visitd);
-			console.log("new point aquired")
+			map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
+			console.log("Moving Down")
 			return true;
 		}
 	
 		else if (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.visitd){
+			console.log("Moving Down")
 			GameActor.tileY--; 
 			return false ;
 		}
@@ -158,12 +173,13 @@ function MoveUp(GameActor , map){
 		function MoveRight(GameActor , map){
 			if (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.not_visited){
 				GameActor.tileX++; 
-				map[GameActor.tileX+1][GameActor.tileY].setType(tilesEnum.visitd);
-				console.log("new point aquired")
+				map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
+				console.log("Moving Right")
 				return true ; 
 			}
 		
 			else if (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.visitd){
+				console.log("Moving Right")
 				GameActor.tileX++; 
 				return false;
 			}
@@ -177,12 +193,14 @@ function MoveUp(GameActor , map){
 			function MoveLeft(GameActor , map){
 				if (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.not_visited){
 					GameActor.tileX--; 
-					map[GameActor.tileX-1][GameActor.tileY].setType(tilesEnum.visitd);
-					console.log("new point aquired")
+					map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
+					console.log("Moving Left")
 					return true;
 				}
 			
 				else if (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.visitd){
+					console.log("Moving Left")
+
 					GameActor.tileX--; 
 					return false;
 				}
@@ -206,13 +224,37 @@ function InitDemo  () {
 	
 	const pacManGameMode = createNewGame();
 	const  canvas = document.getElementById('game-surface');
-canvas.addEventListener("click", () => {
-	MoveUp(pacManGameMode.player , pacManGameMode.level.map)
-  });
+	document.addEventListener("keydown", (event) => {
+		if (event.key === "w" || event.key === "W") {
+		 // MoveUp(pacManGameMode.player, pacManGameMode.level.map);
+		 pacManGameMode.getPlayer().movmentdirection = movmentDirections.up;
+		}
+		else if (event.key === "s" || event.key === "S"){
+			//MoveDown(pacManGameMode.player, pacManGameMode.level.map);
+			pacManGameMode.getPlayer().movmentdirection = movmentDirections.down;
+		}
+
+		else if (event.key === "d" || event.key === "D"){
+			//MoveRight(pacManGameMode.player, pacManGameMode.level.map);
+			pacManGameMode.getPlayer().movmentdirection = movmentDirections.right;
+
+		}
+
+		else if (event.key === "a" || event.key === "A"){
+			//MoveLeft(pacManGameMode.player, pacManGameMode.level.map);
+			pacManGameMode.getPlayer().movmentdirection = movmentDirections.left;
+
+		}
+	  });
 
   function update(){
-	
-	requestAnimationFrame(update);
+	if(pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.up){
+		MoveUp(pacManGameMode.player, pacManGameMode.level.map);
+	}
+	else if(pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.down){
+		MoveDown(pacManGameMode.player, pacManGameMode.level.map);
+	}
+	setTimeout(()=>{requestAnimationFrame(update);},1000)
 	}
 	update();
 };
