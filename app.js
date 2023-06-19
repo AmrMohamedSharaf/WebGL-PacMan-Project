@@ -266,12 +266,28 @@ class GameManager{
 
 	updateGameMap(){
 		if(this.level.map[this.player.getXCords()][this.player.getYCords()].getType() === tilesEnum.not_visited){
-			this.level.map[this.player.getXCords()][this.player.getYCords()].setType(tilesEnum.visitd) 
-			this.score+=100
+			this.level.map[this.player.getXCords()][this.player.getYCords()].setType(tilesEnum.visitd) ;
+			this.score+=100;
 		}
-		// console.log(this.level.map[this.player.getXCords()][this.player.getYCords()]); // Debugging line
 
+		this.level.updateLevelPoints();
 	}
+		// console.log(this.level.map[this.player.getXCords()][this.player.getYCords()]); // Debugging line
+	movePlayer(){
+			if(this.getPlayer().getMovmentDirec() === movmentDirections.up){
+		MoveUp(this.player, this.level.map);
+	}
+	else if(this.getPlayer().getMovmentDirec() === movmentDirections.down){
+		MoveDown(this.player, this.level.map);
+	}
+
+	else if (this.getPlayer().getMovmentDirec() === movmentDirections.left){
+		MoveLeft(this.player, this.level.map);}
+
+		else if (this.getPlayer().getMovmentDirec() === movmentDirections.right){
+			MoveRight(this.player, this.level.map);}
+		}
+	
 }
 
 
@@ -359,8 +375,30 @@ function createNewGame(){
 
 
 
-function EventListners(){ 
+function EventListners(gameManager){ 
+	document.addEventListener("keydown", (event) => {
+		if (event.key === "w" || event.key === "W") {
+			gameManager.getPlayer().movmentdirection = movmentDirections.up;
 
+		 
+		}
+		else if (event.key === "s" || event.key === "S"){
+			//MoveDown(gameManager.player, gameManager.level.map);
+			gameManager.getPlayer().movmentdirection = movmentDirections.down;
+		}
+
+		else if (event.key === "d" || event.key === "D"){
+			//MoveRight(gameManager.player, gameManager.level.map);
+			gameManager.getPlayer().movmentdirection = movmentDirections.right;
+
+		}
+
+		else if (event.key === "a" || event.key === "A"){
+			//MoveLeft(gameManager.player, gameManager.level.map);
+			gameManager.getPlayer().movmentdirection = movmentDirections.left;
+
+		}
+	  });
 }
 
 
@@ -406,50 +444,12 @@ function InitDemo  () {
 
 
 
-
-	 // To Do put this into some function
-	document.addEventListener("keydown", (event) => {
-		if (event.key === "w" || event.key === "W") {
-			pacManGameMode.getPlayer().movmentdirection = movmentDirections.up;
-
-		 
-		}
-		else if (event.key === "s" || event.key === "S"){
-			//MoveDown(pacManGameMode.player, pacManGameMode.level.map);
-			pacManGameMode.getPlayer().movmentdirection = movmentDirections.down;
-		}
-
-		else if (event.key === "d" || event.key === "D"){
-			//MoveRight(pacManGameMode.player, pacManGameMode.level.map);
-			pacManGameMode.getPlayer().movmentdirection = movmentDirections.right;
-
-		}
-
-		else if (event.key === "a" || event.key === "A"){
-			//MoveLeft(pacManGameMode.player, pacManGameMode.level.map);
-			pacManGameMode.getPlayer().movmentdirection = movmentDirections.left;
-
-		}
-	  });
-	  // ******************************
+	EventListners(pacManGameMode);
 
   function update(){
-	// To Do Encapsulate this into a function 
-	if(pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.up){
-		MoveUp(pacManGameMode.player, pacManGameMode.level.map);
-	}
-	else if(pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.down){
-		MoveDown(pacManGameMode.player, pacManGameMode.level.map);
-	}
 
-	else if (pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.left){
-		MoveLeft(pacManGameMode.player, pacManGameMode.level.map);}
-
-		else if (pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.right){
-			MoveRight(pacManGameMode.player, pacManGameMode.level.map);}
-	//***************************** */
+	pacManGameMode.movePlayer();
 	pacManGameMode.updateGameMap();
-	pacManGameMode.level.updateLevelPoints();
 	const gamePointsList = pacManGameMode.level.getGamePoints();
 	pointsdata =  gamePointsList.map((point) => point.getRenderBufferData());
 
