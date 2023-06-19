@@ -1,17 +1,18 @@
-// WEB GL Section 
+// GLSL Shaders
 
 var vertexShaderText = 
 [
 'precision mediump float;',
 '',
 'attribute vec2 vertPosition;',
-'attribute vec3 vertColor;',
+'uniform vec3 vertColor;',
 'varying vec3 fragColor;',
 '',
 'void main()',
 '{',
 '  fragColor = vertColor;',
 '  gl_Position = vec4(vertPosition, 0.0, 1.0);',
+' gl_PointSize = 10.0;',
 '}'
 ].join('\n');
 
@@ -28,23 +29,73 @@ var fragmentShaderText =
 //******************************** *
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function createShaders(){
-	var  canvas = document.getElementById('game-surface');
+// Helper functions 
+var  canvas = document.getElementById('game-surface');
 var gl = canvas.getContext('webgl');
+var program;
+
+
+
+function getNormllizedCoords(coordvec , xAxisSize , yAxisSize){
+	let xhalfAxisSize = xAxisSize/2;
+	let yhalfAxisSize = yAxisSize/2;
+
+	let normX = (coordvec[0]/xAxisSize)-1;
+	let normY = (coordvec[1]/yAxisSize)-1;
+	return[normX , normY];
+
+}
+
+
+function flatten( v )
+{
+    if ( v.matrix === true ) {
+        v = transpose( v );
+    }
+
+    var n = v.length;
+    var elemsAreArrays = false;
+
+    if ( Array.isArray(v[0]) ) {
+        elemsAreArrays = true;
+        n *= v[0].length;
+    }
+
+    var floats = new Float32Array( n );
+
+    if ( elemsAreArrays ) {
+        var idx = 0;
+        for ( var i = 0; i < v.length; ++i ) {
+            for ( var j = 0; j < v[i].length; ++j ) {
+                floats[idx++] = v[i][j];
+            }
+        }
+    }
+    else {
+        for ( var i = 0; i < v.length; ++i ) {
+            floats[i] = v[i];
+        }
+    }
+
+    return floats;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// To DO rewrite the code for creating shaders
+function createShaders(){
+
 
 	if (!gl) {
 		console.log('WebGL not supported, falling back on experimental-webgl');
@@ -79,7 +130,7 @@ var gl = canvas.getContext('webgl');
 		return;
 	}
 
-	var program = gl.createProgram();
+	 program = gl.createProgram();
 	gl.attachShader(program, vertexShader);
 	gl.attachShader(program, fragmentShader);
 	gl.linkProgram(program);
@@ -165,7 +216,7 @@ class GameActor{
 
 
 	getRenderBufferData(){
-		return this.renderBufferData;
+		return getNormllizedCoords(this.renderBufferData , canvas.width , canvas.height);
 	}
 }
 
@@ -178,6 +229,7 @@ class Level {
 	}
 
 	updateLevelPoints(){
+		this.gamePointsList = []
 		this.map.forEach((row, y) => {
 			row.forEach((tile, x) => {
 			  if (tile.type === tilesEnum.not_visited) {
@@ -211,7 +263,80 @@ class GameManager{
 		console.log(this.score);
 		console.log(this.level.getGamePoints());
 	}
+
+	updateGameMap(){
+		if(this.level.map[this.player.getXCords()][this.player.getYCords()].getType() === tilesEnum.not_visited){
+			this.level.map[this.player.getXCords()][this.player.getYCords()].setType(tilesEnum.visitd) 
+			this.score+=100
+		}
+		// console.log(this.level.map[this.player.getXCords()][this.player.getYCords()]); // Debugging line
+
+	}
 }
+
+
+
+
+// Controllers 
+
+function MoveUp(GameActor , map){
+	if  (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.wall)  { 
+		console.log("wall");
+	}
+
+	else  {
+		GameActor.tileY++; 
+		console.log("Moving Up")
+		return;
+	}
+
+	
+	}
+
+	function MoveDown(GameActor , map){
+		if  (map[GameActor.tileX][GameActor.tileY - 1].getType() === tilesEnum.wall)  { 
+			console.log("wall");
+		}
+	
+		else  {
+			GameActor.tileY--; 
+			console.log("Moving Down")
+			return;
+		}
+		}
+
+		function MoveRight(GameActor , map){
+			if  (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.wall)  { 
+				console.log("wall");
+			}
+		
+			else  {
+				GameActor.tileX++; 
+				console.log("Moving Right")
+				return;
+			}
+			}
+			
+
+			function MoveLeft(GameActor , map){
+				if  (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.wall)  { 
+					console.log("wall");
+				}
+			
+				else  {
+					GameActor.tileX--; 
+					console.log("Moving Left")
+					return;
+				}
+				}
+	
+
+
+
+// ********************************
+
+
+
 
 
 
@@ -225,7 +350,7 @@ function createNewGame(){
 	 demoLevel = new Level(map, null);
 	 demoLevel.updateLevelPoints();
 
-	 pacManTrig = new GameActor(gameObjectTypes.palayer,0,0 ,[300, 100])
+	 pacManTrig = new GameActor(gameObjectTypes.player,0,0 ,[300, 100])
 
 	 currentGameManager = new GameManager(demoLevel , 60 , pacManTrig);
 	 return currentGameManager
@@ -233,92 +358,11 @@ function createNewGame(){
 }
 
 
-// Controllers 
 
-function MoveUp(GameActor , map){
-	if (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.not_visited){
-		GameActor.tileY++; 
-		map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
-		console.log("Moving Up") // debugging 
-		return;
-	}
+function EventListners(){ 
 
-	else if (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.visitd){
-		GameActor.tileY++; 
-		console.log("Moving Up")
-		return;
-	}
+}
 
-	else if  (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.wall)  { 
-		console.log("wall");
-	}
-	}
-
-	function MoveDown(GameActor , map){
-		if (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.not_visited){
-			GameActor.tileY--; 
-			map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
-			console.log("Moving Down")
-			return true;
-		}
-	
-		else if (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.visitd){
-			console.log("Moving Down")
-			GameActor.tileY--; 
-			return false ;
-		}
-	
-		else if  (map[GameActor.tileX][GameActor.tileY -1].getType() === tilesEnum.wall)  { 
-			console.log("wall");
-			return false;
-		}
-		}
-
-		function MoveRight(GameActor , map){
-			if (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.not_visited){
-				GameActor.tileX++; 
-				map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
-				console.log("Moving Right")
-				return true ; 
-			}
-		
-			else if (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.visitd){
-				console.log("Moving Right")
-				GameActor.tileX++; 
-				return false;
-			}
-		
-			else if  (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.wall)  { 
-				console.log("wall");
-				return false;
-			}
-			}
-
-			function MoveLeft(GameActor , map){
-				if (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.not_visited){
-					GameActor.tileX--; 
-					map[GameActor.tileX][GameActor.tileY].setType(tilesEnum.visitd);
-					console.log("Moving Left")
-					return true;
-				}
-			
-				else if (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.visitd){
-					console.log("Moving Left")
-
-					GameActor.tileX--; 
-					return false;
-				}
-			
-				else if  (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.wall)  { 
-					console.log("wall");
-					return false;
-				}
-				}
-	
-
-
-
-// ********************************
 
 
 
@@ -326,13 +370,49 @@ function MoveUp(GameActor , map){
 
 function InitDemo  () {
 	
+
+
+
 	const pacManGameMode = createNewGame();
 	createShaders();
+	gl.useProgram(program);
+		const gamePointsList = pacManGameMode.level.getGamePoints();
+	
+		let pointsdata =  gamePointsList.map((point) => point.getRenderBufferData());
+	  
+
+	  console.log(pointsdata);
+	  
+
+	var pointsBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, pointsBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatten(pointsdata)), gl.STATIC_DRAW);
+
+	var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
+	var colorAttribLocation = gl.getUniformLocation(program, 'vertColor');
+	gl.vertexAttribPointer(
+		positionAttribLocation, // Attribute location
+		2, // Number of elements per attribute
+		gl.FLOAT, // Type of elements
+		gl.FALSE,
+		2 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+		0 // Offset from the beginning of a single vertex to this attribute
+	);
+
+
+	gl.enableVertexAttribArray( positionAttribLocation );  
+	gl.uniform3f(colorAttribLocation , 1.0,0.0,0.0,);
+  
+
+
+
+
 	 // To Do put this into some function
 	document.addEventListener("keydown", (event) => {
 		if (event.key === "w" || event.key === "W") {
-		 // MoveUp(pacManGameMode.player, pacManGameMode.level.map);
-		 pacManGameMode.getPlayer().movmentdirection = movmentDirections.up;
+			pacManGameMode.getPlayer().movmentdirection = movmentDirections.up;
+
+		 
 		}
 		else if (event.key === "s" || event.key === "S"){
 			//MoveDown(pacManGameMode.player, pacManGameMode.level.map);
@@ -368,9 +448,29 @@ function InitDemo  () {
 		else if (pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.right){
 			MoveRight(pacManGameMode.player, pacManGameMode.level.map);}
 	//***************************** */
+	pacManGameMode.updateGameMap();
+	pacManGameMode.level.updateLevelPoints();
+	const gamePointsList = pacManGameMode.level.getGamePoints();
+	pointsdata =  gamePointsList.map((point) => point.getRenderBufferData());
 
 
 
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatten(pointsdata)), gl.STATIC_DRAW);
+	var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
+	var colorAttribLocation = gl.getUniformLocation(program, 'vertColor');
+	gl.vertexAttribPointer(
+		positionAttribLocation, // Attribute location
+		2, // Number of elements per attribute
+		gl.FLOAT, // Type of elements
+		gl.FALSE,
+		2 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
+		0 // Offset from the beginning of a single vertex to this attribute
+	);
+
+
+	gl.enableVertexAttribArray( positionAttribLocation );  
+	gl.clear( gl.COLOR_BUFFER_BIT ); 
+    gl.drawArrays( gl.POINTS, 0, pointsdata.length );
 
 	setTimeout(()=>{requestAnimationFrame(update);},1000)
 	}
