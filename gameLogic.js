@@ -12,7 +12,7 @@ var vertexShaderText =
 '{',
 '  fragColor = vertColor;',
 '  gl_Position = vec4(vertPosition, 0.0, 1.0);',
-' gl_PointSize = 10.0;',
+' gl_PointSize = 16.0;',
 '}'
 ].join('\n');
 
@@ -222,8 +222,10 @@ class GameActor{
 
 // Desc : takes an array of points data buffer and walls data buffer and a 2d array for the map
 class Level {
-	constructor(map ,  wallsDataBuffer){
+	constructor(map , width , highet ,   wallsDataBuffer){
 		this.map = map; 
+		this.width = width; 
+		this.highet = highet
 		this.wallsDataBuffer = wallsDataBuffer;
 		this.gamePointsList = []
 	}
@@ -296,7 +298,7 @@ class GameManager{
 // Controllers 
 
 function MoveUp(GameActor , map){
-	if  (map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.wall)  { 
+	if  (GameActor.tileY >=9 || map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.wall  )  {  // To Do change that to the levels cords by passign the level
 		console.log("wall");
 	}
 
@@ -310,7 +312,7 @@ function MoveUp(GameActor , map){
 	}
 
 	function MoveDown(GameActor , map){
-		if  (map[GameActor.tileX][GameActor.tileY - 1].getType() === tilesEnum.wall)  { 
+		if  (GameActor.tileY <=0 || map[GameActor.tileX][GameActor.tileY - 1].getType() === tilesEnum.wall)  { 
 			console.log("wall");
 		}
 	
@@ -322,7 +324,7 @@ function MoveUp(GameActor , map){
 		}
 
 		function MoveRight(GameActor , map){
-			if  (map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.wall)  { 
+			if  (GameActor.tileX >=8 || map[GameActor.tileX+1][GameActor.tileY].getType() === tilesEnum.wall)  { 
 				console.log("wall");
 			}
 		
@@ -335,7 +337,7 @@ function MoveUp(GameActor , map){
 			
 
 			function MoveLeft(GameActor , map){
-				if  (map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.wall)  { 
+				if  ( GameActor.tileX <=0 ||map[GameActor.tileX-1][GameActor.tileY].getType() === tilesEnum.wall)  { 
 					console.log("wall");
 				}
 			
@@ -358,15 +360,77 @@ function MoveUp(GameActor , map){
 
 function createNewGame(){
 	const map = [
-		[new Tile(tilesEnum.not_visited, [100, 100]), new Tile(tilesEnum.not_visited, [100, 300]), new Tile(tilesEnum.wall, [100, 500])],
-		[new Tile(tilesEnum.not_visited, [300, 100]), new Tile(tilesEnum.not_visited, [300, 300]), new Tile(tilesEnum.not_visited, [300, 500])],
-		[new Tile(tilesEnum.not_visited, [500, 100]), new Tile(tilesEnum.not_visited, [500, 300]), new Tile(tilesEnum.not_visited, [500, 500])]
+		// first Column
+		[new Tile(tilesEnum.not_visited, [100, 100]), new Tile(tilesEnum.not_visited, [100, 300]), new Tile(tilesEnum.not_visited, [100, 500]),
+		new Tile(tilesEnum.not_visited, [100, 700]), new Tile(tilesEnum.not_visited, [100, 900]), new Tile(tilesEnum.not_visited, [100, 1100]),
+		new Tile(tilesEnum.not_visited, [100, 1300]), new Tile(tilesEnum.not_visited, [100, 1500]), new Tile(tilesEnum.not_visited, [100, 1700]),
+		new Tile(tilesEnum.not_visited, [100, 1900])
+	    ],
+	
+	// Second Column
+	[new Tile(tilesEnum.not_visited, [300, 100]), new Tile(tilesEnum.wall, [300, 300]), new Tile(tilesEnum.wall, [300, 500]),
+		new Tile(tilesEnum.not_visited, [300, 700]), new Tile(tilesEnum.wall, [300, 900]), new Tile(tilesEnum.wall, [300, 1100]),
+		new Tile(tilesEnum.not_visited, [300, 1300]), new Tile(tilesEnum.wall, [300, 1500]), new Tile(tilesEnum.wall, [300, 1700]),
+		new Tile(tilesEnum.not_visited, [300, 1900])
+	 ],
+
+	 	// Third Column
+	[new Tile(tilesEnum.not_visited, [500, 100]), new Tile(tilesEnum.wall, [500, 300]), new Tile(tilesEnum.wall, [500, 500]),
+	new Tile(tilesEnum.not_visited, [500, 700]), new Tile(tilesEnum.not_visited, [500, 900]), new Tile(tilesEnum.not_visited, [500, 1100]),
+	new Tile(tilesEnum.not_visited, [500, 1300]), new Tile(tilesEnum.wall, [500, 1500]), new Tile(tilesEnum.wall, [500, 1700]),
+	new Tile(tilesEnum.not_visited, [500, 1900])
+   ],
+
+   	 	// Fourth Column
+	[new Tile(tilesEnum.not_visited, [700, 100]), new Tile(tilesEnum.wall, [700, 300]), new Tile(tilesEnum.wall, [700, 500]),
+	new Tile(tilesEnum.not_visited, [700, 700]), new Tile(tilesEnum.not_visited, [700, 900]), new Tile(tilesEnum.not_visited, [700, 1100]),
+	new Tile(tilesEnum.not_visited, [700, 1300]), new Tile(tilesEnum.wall, [700, 1500]), new Tile(tilesEnum.wall, [700, 1700]),
+	new Tile(tilesEnum.not_visited, [700, 1900])
+   ],
+
+    	 	// 5th Column
+	[new Tile(tilesEnum.visitd, [900, 100]), new Tile(tilesEnum.not_visited, [900, 300]), new Tile(tilesEnum.not_visited, [900, 500]),
+	new Tile(tilesEnum.not_visited, [900, 700]), new Tile(tilesEnum.wall, [900, 900]), new Tile(tilesEnum.wall, [900, 1100]),
+	new Tile(tilesEnum.not_visited, [900, 1300]), new Tile(tilesEnum.not_visited, [900, 1500]), new Tile(tilesEnum.not_visited, [900, 1700]),
+	new Tile(tilesEnum.not_visited, [900, 1900])
+   ],
+
+       	 	// 6th Column
+	[new Tile(tilesEnum.not_visited, [1100, 100]), new Tile(tilesEnum.wall, [1100, 300]), new Tile(tilesEnum.wall, [1100, 500]),
+	new Tile(tilesEnum.not_visited, [1100, 700]), new Tile(tilesEnum.not_visited, [1100, 900]), new Tile(tilesEnum.not_visited, [1100, 1100]),
+	new Tile(tilesEnum.not_visited, [1100, 1300]), new Tile(tilesEnum.wall, [1100, 1500]), new Tile(tilesEnum.wall, [1100, 1700]),
+	new Tile(tilesEnum.not_visited, [1100, 1900])
+   ],
+
+         	 	// 7th Column
+	[new Tile(tilesEnum.not_visited, [1300, 100]), new Tile(tilesEnum.wall, [1300, 300]), new Tile(tilesEnum.wall, [1300, 500]),
+	new Tile(tilesEnum.not_visited, [1300, 700]), new Tile(tilesEnum.not_visited, [1300, 900]), new Tile(tilesEnum.not_visited, [1300, 1100]),
+	new Tile(tilesEnum.not_visited, [1300, 1300]), new Tile(tilesEnum.wall, [1300, 1500]), new Tile(tilesEnum.wall, [1300, 1700]),
+	new Tile(tilesEnum.not_visited, [1300, 1900])
+   ],
+
+            	 	// 8th Column
+	[new Tile(tilesEnum.not_visited, [1500, 100]), new Tile(tilesEnum.wall, [1500, 300]), new Tile(tilesEnum.wall, [1500, 500]),
+	new Tile(tilesEnum.not_visited, [1500, 700]), new Tile(tilesEnum.wall, [1500, 900]), new Tile(tilesEnum.wall, [1500, 1100]),
+	new Tile(tilesEnum.not_visited, [1500, 1300]), new Tile(tilesEnum.wall, [1500, 1500]), new Tile(tilesEnum.wall, [1500, 1700]),
+	new Tile(tilesEnum.not_visited, [1500, 1900])
+   ],
+
+               	 	// 9th Column
+	[new Tile(tilesEnum.not_visited, [1700, 100]), new Tile(tilesEnum.not_visited, [1700, 300]), new Tile(tilesEnum.not_visited, [1700, 500]),
+	new Tile(tilesEnum.not_visited, [1700, 700]), new Tile(tilesEnum.not_visited, [1700, 900]), new Tile(tilesEnum.not_visited, [1700, 1100]),
+	new Tile(tilesEnum.not_visited, [1700, 1300]), new Tile(tilesEnum.not_visited, [1700, 1500]), new Tile(tilesEnum.not_visited, [1700, 1700]),
+	new Tile(tilesEnum.not_visited, [1700, 1900])
+   ],
+
+
+
 	  ];
 
-	 demoLevel = new Level(map, null);
+	 demoLevel = new Level(map, 9 , 10, null);
 	 demoLevel.updateLevelPoints();
 
-	 pacManTrig = new GameActor(gameObjectTypes.player,0,0 ,[300, 100])
+	 pacManTrig = new GameActor(gameObjectTypes.player,4,0 ,[300, 100])
 
 	 currentGameManager = new GameManager(demoLevel , 60 , pacManTrig);
 	 return currentGameManager
