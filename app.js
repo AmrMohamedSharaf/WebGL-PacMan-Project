@@ -1,3 +1,107 @@
+// WEB GL Section 
+
+var vertexShaderText = 
+[
+'precision mediump float;',
+'',
+'attribute vec2 vertPosition;',
+'attribute vec3 vertColor;',
+'varying vec3 fragColor;',
+'',
+'void main()',
+'{',
+'  fragColor = vertColor;',
+'  gl_Position = vec4(vertPosition, 0.0, 1.0);',
+'}'
+].join('\n');
+
+var fragmentShaderText =
+[
+'precision mediump float;',
+'',
+'varying vec3 fragColor;',
+'void main()',
+'{',
+'  gl_FragColor = vec4(fragColor, 1.0);',
+'}'
+].join('\n');
+//******************************** *
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createShaders(){
+	var  canvas = document.getElementById('game-surface');
+var gl = canvas.getContext('webgl');
+
+	if (!gl) {
+		console.log('WebGL not supported, falling back on experimental-webgl');
+		gl = canvas.getContext('experimental-webgl');
+	}
+
+	if (!gl) {
+		alert('Your browser does not support WebGL');
+	}
+
+	gl.clearColor(0.75, 0.85, 0.8, 1.0);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	//
+	// Create shaders
+	// 
+	var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+	var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+	gl.shaderSource(vertexShader, vertexShaderText);
+	gl.shaderSource(fragmentShader, fragmentShaderText);
+
+	gl.compileShader(vertexShader);
+	if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+		console.error('ERROR compiling vertex shader!', gl.getShaderInfoLog(vertexShader));
+		return;
+	}
+
+	gl.compileShader(fragmentShader);
+	if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+		console.error('ERROR compiling fragment shader!', gl.getShaderInfoLog(fragmentShader));
+		return;
+	}
+
+	var program = gl.createProgram();
+	gl.attachShader(program, vertexShader);
+	gl.attachShader(program, fragmentShader);
+	gl.linkProgram(program);
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+		console.error('ERROR linking program!', gl.getProgramInfoLog(program));
+		return;
+	}
+	gl.validateProgram(program);
+	if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
+		console.error('ERROR validating program!', gl.getProgramInfoLog(program));
+		return;
+	}
+}
+
+
+
+
+
+
+
+
+
 // Our Game Structure 
 const tilesEnum = {
 	visitd: 0,
@@ -223,7 +327,8 @@ function MoveUp(GameActor , map){
 function InitDemo  () {
 	
 	const pacManGameMode = createNewGame();
-	const  canvas = document.getElementById('game-surface');
+	createShaders();
+	 // To Do put this into some function
 	document.addEventListener("keydown", (event) => {
 		if (event.key === "w" || event.key === "W") {
 		 // MoveUp(pacManGameMode.player, pacManGameMode.level.map);
@@ -246,14 +351,27 @@ function InitDemo  () {
 
 		}
 	  });
+	  // ******************************
 
   function update(){
+	// To Do Encapsulate this into a function 
 	if(pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.up){
 		MoveUp(pacManGameMode.player, pacManGameMode.level.map);
 	}
 	else if(pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.down){
 		MoveDown(pacManGameMode.player, pacManGameMode.level.map);
 	}
+
+	else if (pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.left){
+		MoveLeft(pacManGameMode.player, pacManGameMode.level.map);}
+
+		else if (pacManGameMode.getPlayer().getMovmentDirec() === movmentDirections.right){
+			MoveRight(pacManGameMode.player, pacManGameMode.level.map);}
+	//***************************** */
+
+
+
+
 	setTimeout(()=>{requestAnimationFrame(update);},1000)
 	}
 	update();
