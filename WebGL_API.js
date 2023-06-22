@@ -133,7 +133,7 @@ export class VertexArray{
 
        // console.log(atr.count);
         offset += atr.count * Float32Array.BYTES_PER_ELEMENT;
-        console.log(offset);
+        //console.log(offset);
         i++;
     });
     }
