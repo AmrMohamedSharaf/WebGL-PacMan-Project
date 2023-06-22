@@ -209,27 +209,28 @@ export class Renderer {
         this.program = program; 
     }
 
-    drawTriangle(count){
+    drawTriangle(){
+        this.program.bindProgram();
         this.vertexbuffer.bindBuffer();
         this.vertexarray.bindVertexArray();
-        this.program.bindProgram();
-        gl.drawArrays(gl.TRIANGLES, 0, count);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
 
     drawPoint(count){
+        this.program.bindProgram();
         this.vertexbuffer.bindBuffer();
         this.vertexarray.bindVertexArray();
-        this.program.bindProgram();
-        gl.drawArrays(gl.TRIANGLES, 0, count);
+        gl.drawArrays(gl.POINTS, 0, count);
     }
 
-    drawRectangle(indexbuffer,count){
-        indexbuffer.bindBuffer();
+    drawRectangle(indcies){
+        this.program.bindProgram();
+        
         this.vertexbuffer.bindBuffer();
         this.vertexarray.bindVertexArray();
-        this.program.bindProgram();
-        gl.drawArrays(gl.TRIANGLES, 0, count);
+        let indexbuffer = new IndexBuffer(indcies , 1)
+        gl.drawElements(gl.TRIANGLES, indcies.length, gl.UNSIGNED_SHORT, 0);
     }
 
 }
