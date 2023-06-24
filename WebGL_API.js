@@ -37,7 +37,7 @@ export class VertexBuffer {
     }
     updateData(newdata){
         this.data = new Float32Array(newdata);
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferID);
+         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufferID);
         if(this.usage === 1) {gl.bufferData(gl.ARRAY_BUFFER, this.data, gl.STATIC_DRAW);}// static draw
         if(this.usage === 2) {gl.bufferData(gl.ARRAY_BUFFER, this.data, gl.DYNAMIC_DRAW);}// Dynamic draw
     }
@@ -68,7 +68,7 @@ export class IndexBuffer {
     }
     updateData(newdata){
         this.data = new Uint16Array( newdatadata); ;
-        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufferID);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufferID);
         if(this.usage === 1) {gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.data, gl.STATIC_DRAW);}// static draw
         if(this.usage === 2) {gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.data, gl.DYNAMIC_DRAW);}// Dynamic draw
     }
@@ -195,8 +195,19 @@ export class Program{
         gl.useProgram(null);
     }
 
-    setUniform(unifromLoc , f1 , f2 , f3 , f4){
-        gl.uniform3f(unifromLoc , f1,f2,f3,f4);
+    setUniform3(unifromName , f1 , f2,f3){
+        let loc  = gl.getUniformLocation(this.program, unifromName);
+        gl.uniform3f(loc , f1,f2,f3);
+    }
+
+    setUniform2(unifromName , f1 , f2){
+        let loc  = gl.getUniformLocation(this.program, unifromName);
+        gl.uniform2f(loc , f1,f2);
+    }
+
+    setUniform1(unifromName , f1){
+        let loc  = gl.getUniformLocation(this.program, unifromName);
+        gl.uniform1f(loc , f1);
     }
 }
 
@@ -224,13 +235,25 @@ export class Renderer {
         gl.drawArrays(gl.POINTS, 0, count);
     }
 
-    drawRectangle(indcies){
+    drawRectangle(){
         this.program.bindProgram();
-        
+        let    indices = [
+            2 ,1 ,0 ,  // first triangle
+            1,2,3,   // second triangle
+          ];
         this.vertexbuffer.bindBuffer();
         this.vertexarray.bindVertexArray();
-        let indexbuffer = new IndexBuffer(indcies , 1)
-        gl.drawElements(gl.TRIANGLES, indcies.length, gl.UNSIGNED_SHORT, 0);
+        let indexbuffer = new IndexBuffer(indices , 1)
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    }
+
+
+    drawLine(count){
+        this.program.bindProgram();
+        this.vertexbuffer.bindBuffer();
+        this.vertexarray.bindVertexArray();
+        gl.drawArrays(gl.LINES_STRIP, 0, count);
+
     }
 
 }
