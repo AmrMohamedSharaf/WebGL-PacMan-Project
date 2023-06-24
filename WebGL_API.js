@@ -17,7 +17,7 @@ window.gl = gl
 window.canvas = canvas;
 
 
-
+// Desc  creates and bind , unbind a vertex buffer 
 
 export class VertexBuffer {
     constructor(data , usage , size){
@@ -50,6 +50,7 @@ export class VertexBuffer {
     }
 
 
+// Desc  creates and bind , unbind a index buffer 
 
 export class IndexBuffer {
     constructor(data , usage){
@@ -98,6 +99,8 @@ export class VertexAtr{
     }
 }
 
+// Desc keeps track of the layout of each vertex attribute in the buffer 
+
 export class bufferLayout{
     constructor(){
         this.vertexAtrArray = []; 
@@ -109,7 +112,7 @@ export class bufferLayout{
     }
 }
 
-
+// bind the buffer and the layouts together
 export class VertexArray{
     constructor(vertexBuffer , bufferLayout){
        this.renderID = gl.createVertexArray();
@@ -148,7 +151,7 @@ export class VertexArray{
     }
 }
 
-
+// Creates a vertex and fragment shader based on the inputed text 
 export class Program{ 
     constructor(vertexShaderPath , fragmentShaderPath , type){
         let vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -211,7 +214,7 @@ export class Program{
     }
 }
 
-
+// object that takes a buffer program and vertex array and is ready to render all the premitece shapes  
 
 export class Renderer {
     constructor(vertexbuffer , vertexarray , program){

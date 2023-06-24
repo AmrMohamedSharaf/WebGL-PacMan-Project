@@ -42,7 +42,7 @@ var fragmentShaderText =
 
 var  canvas = document.getElementById('glcanvas');
 
-
+// Desc Generates a new 2D arrays of tiles based on the size of the canvas 
 
 function createNewMap(tileSize){
     const newMap = [];
@@ -53,21 +53,21 @@ function createNewMap(tileSize){
     for (let x = tileSize; x <= width; x += tileSize*2) {
         const column = [];
       
-        // Iterate through each row in the column
+        // 
         for (let y = tileSize; y <= highet; y += tileSize*2) {
-          // Create a new tile with the same coordinates
+          // 
           const tile = new gameLogic.Tile(gameLogic.tilesEnum.not_visited , [x , y]);
           column.push(tile);
         }
       
-        // Add the column to the tiles array
+        // 
         newMap.push(column);
       }
 
       return newMap
 }
 
-
+// Establishes the locations of the wallls and the spec item  return the game mananger 
 
 
 function createNewGame(timer , maxScore , numOfPoints){
@@ -116,12 +116,16 @@ function createNewGame(timer , maxScore , numOfPoints){
 }
 
 
+// returns the render buffer data of the game points. this date is update by the game manger 
+
 function getPointsData(gameManager){
     const gamePointsList = gameManager.level.getGamePoints();
 	let pointsdata =  gamePointsList.map((point) => point.getRenderBufferData());
 	return pointsdata;
 }
 
+
+// Utilized the WebGL interface I wrote in the other file to quickly render the points 
 function renderPoints(pointsBuffer , numOfPoints , program){
     let posAtr = new webGL.VertexAtr(gl.FLOAT , 2 , false); 
     let posLayout = new webGL.bufferLayout();
@@ -134,6 +138,9 @@ function renderPoints(pointsBuffer , numOfPoints , program){
     rendrer.drawPoint(numOfPoints);
     //pointsBuffer.unbindBuffer();
 }
+
+
+// Utilized the WebGL interface I wrote in the other file to quickly render the points 
 
 function renderSpecItem(pointsBuffer , numOfPoints , program){
   let posAtr = new webGL.VertexAtr(gl.FLOAT , 2 , false); 
@@ -149,6 +156,7 @@ function renderSpecItem(pointsBuffer , numOfPoints , program){
 }
 
 
+// Utilized the WebGL interface I wrote in the other file to quickly render the triangle  
 
 function renderPlayer(gameManager , playerBuffer , program){
 
@@ -164,6 +172,7 @@ function renderPlayer(gameManager , playerBuffer , program){
 
 }
 
+// Utilized the WebGL interface I wrote in the other file to quickly render the ghosts  
 
 
 function renderBFSGhost(gameManager , ghostBuffer , program){
@@ -207,22 +216,10 @@ function renderbox( boxBuffer , program){
   rendrer.drawRectangle();
 }
 
-function rendercage( boxBuffer , program){
-
-  let posAtr = new webGL.VertexAtr(gl.FLOAT , 2 , false); 
-  let posLayout = new webGL.bufferLayout();
-  posLayout.pushAtr(posAtr);
-  let vertexAraryPoints = new webGL.VertexArray(boxBuffer , posLayout);
-  let rendrer = new webGL.Renderer(boxBuffer , vertexAraryPoints , program);
-  program.setUniform3("vertColor" , 1.0 , 0.0 , 1.0)
-  program.setUniform1("pointSize" , 0)
-  program.setUniform2("tranlationVect" , 0.0 , 0.0);
-  rendrer.drawLine(4);
-}
-
+// Desc : the start of our game 
 function InitDemo  () {
 
-
+  // hardcoded values for the walls , player and spec item 
 	var pacManGameMode = createNewGame(60 , 500 , 58);
 
     let playercoords  = [
@@ -275,7 +272,9 @@ function InitDemo  () {
     //let bfsghostdata =  bfsGhostcoords.map((coords) => utils.getNormllizedCoords(coords , canvas.clientWidth , canvas.clientHeight));
 
    // console.log(bfsghostdata)
-    
+
+
+    // Creating the render buffers and the frame varaible which will used in the request next animaiton frame 
 
     let  pointsData = getPointsData(pacManGameMode);
     let pointsBuffer = new webGL.VertexBuffer(utils.flatten(pointsData) , 1 , 2);
@@ -290,6 +289,8 @@ function InitDemo  () {
     let box6Buffer = new webGL.VertexBuffer(utils.flatten(box6data) , 1 , 2);
     let specItemBuffer = new webGL.VertexBuffer(utils.flatten(specItemdata) , 1 , 2);
     let program = new webGL.Program(vertexShaderText , fragmentShaderText);
+
+
     var frame;
 	gameLogic.EventListners(pacManGameMode);
     var is_paused = false; 
@@ -310,12 +311,15 @@ function InitDemo  () {
   
  // update();
   function update(){
+    //Update the HTML text
     var Score = document.getElementById('score'); 
     Score.textContent = 'Score: ' + pacManGameMode.score;
     var timer = document.getElementById('timer'); 
     timer.textContent = 'Time: ' + pacManGameMode.timer;
     gl.clearColor(0.5, 0.5, 0.5, 1.0);
     gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+
+        //render the objects 
     renderbox(box1Buffer , program);
     renderbox(box2Buffer , program);
     renderbox(box3Buffer , program);
@@ -326,23 +330,26 @@ function InitDemo  () {
      renderPoints(pointsBuffer , pacManGameMode.numOfPonts , program);
      pacManGameMode.movePlayer();
      renderPlayer(pacManGameMode , playerBuffer , program);
-  
+    // Update the game stauts 
      pacManGameMode.updateGameStatus()
 
      pacManGameMode.moveBFSGhost();
      pacManGameMode.moveGreedyGhost();
      renderBFSGhost(pacManGameMode , bfsghostBuffer , program)
      renderGreedyGhost(pacManGameMode , greedyghostBuffer , program)
-     
+     // update the game points 
     let  pointsData = getPointsData(pacManGameMode);
     pointsBuffer.updateData(utils.flatten(pointsData));
     pacManGameMode.getGameData();
 
-    
+      // checks if the P key was pressed if not then render the next frame 
       if(!pacManGameMode.stoped){  frame = setTimeout(()=>{requestAnimationFrame(update);},500)
     }
 
 	}
+
+
+  // more event listners for the reset start and pause. 
 
   document.addEventListener("keydown", (event) => {
      if (event.shiftKey && (event.key =="R" || event.key == "r")){

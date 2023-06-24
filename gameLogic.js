@@ -1,4 +1,19 @@
 import * as utils from './util.js';
+var  canvas = document.getElementById('glcanvas');
+
+
+//AI Logic : 
+
+
+// there are two ghosts , BFS which will chase the player  
+// Greedy which will go for the seond best move , that 's because I want to balance the game by having one ghost covering the parts where the player is not moving 
+// while the other ghost (BFS ) is chasing the player 
+
+
+
+
+
+// Desc : Helpoer fucntion to check if the search state is equal the player positon // Helper for BFS
 
 function checkNode(node1 , gameActor){
 	if (node1.X === gameActor.tileX && node1.Y === gameActor.tileY){
@@ -7,7 +22,7 @@ function checkNode(node1 , gameActor){
 	return false ;
 }
 
-
+// Desc : Helper for Greedy Algo 
 function manhattanDistance(x , y , player) {
 	let distanceX = Math.abs(x - player.tileX);
 	let distanceY = Math.abs(y - player.tileY);
@@ -16,7 +31,7 @@ function manhattanDistance(x , y , player) {
   }
 
 
-
+// Enum that holds differnt type of tiles which can have a point , a spec item or a wall 
 // Our Game Structure 
 export const tilesEnum = {
 	visitd: 0,
@@ -25,6 +40,8 @@ export const tilesEnum = {
 	speialItem : 3
 }
 
+// types of game actors  
+
 export const gameObjectTypes = {
 	points: 0,
 	ghosts_1: 1, // use the first AI algorithm
@@ -32,7 +49,7 @@ export const gameObjectTypes = {
 	player:3
 }
 
-
+// movment directions 
 export const movmentDirections = {
 	up : 1,
 	down : -1 ,
@@ -41,12 +58,15 @@ export const movmentDirections = {
 	stop : 0
 }
 
+
+// Desc : tile objects are the blocks the generate the map 
 export class Tile { 
+	// Constructor 
 	constructor(type, renderBufferData ){ 
 		this.type = type ;
 		this.renderBufferData = renderBufferData;
 	}
-
+	// Getters 
 	getType(){ 
 		return this.type; 
 	}
@@ -59,13 +79,13 @@ export class Tile {
 }
 
 
-
+// Helper function that reuturns a list of valid moves for a curret search state // used to implement BFS 
 function getValidMoves(map , node){
 	let validMoves = [] ;
 	
 
 
-	
+	 // checks the tile for every possilbe next move and if it's a valid move , not a wall then adds it to the list
 	if(node.X < 8  && map[node.X+1][node.Y].type != tilesEnum.wall){
 		validMoves.push({X:node.X+1 , Y:node.Y , action:movmentDirections.right , parent : node})
 	}
@@ -94,20 +114,20 @@ function getValidMoves(map , node){
 
 }
 
-var  canvas = document.getElementById('glcanvas');
-
+// class the has the building block for all the objects of the game , player , ghosts and points 
 export class GameActor{
 	constructor(type ,tileX, tileY , renderBufferData){
-		this.movmentdirection = 0;
-		this.type = type
-		this.tileX = tileX; 
+		this.movmentdirection = 0; // current direction
+		this.type = type // type 
+		this.tileX = tileX;  // initial location on the board 
 		this.tileY = tileY; 
-		this.renderBufferData = renderBufferData; 
-		this.canMove = true;
-		this.translationX = 450.0; 
+		this.renderBufferData = renderBufferData;  // rendering coords 
+		this.canMove = true; // bool value that's use to implment the control system 
+		this.translationX = 450.0;  // hardcoded value for the current translatoin // ToDO Change it to a paased argument 
 		this.translationY = 500.0;
 	}
 
+		// Getters 
 	getXCords(){
 		return this.tileX;
 	}
@@ -170,10 +190,10 @@ export class Level {
 	}
 }
 
-
+// The master class of the game which has all information on the current game session and also listens to the players controls 
 export class GameManager{ 
 	constructor(level , timer , maxScore , numOfPoints, player , bFSGhost , greadyGhost , specTileX , specTileY){
-		this.level = level; 
+		this.level = level;  
 		this.timer = timer 
 		this.score = 0;
 		this.player = player;
@@ -184,12 +204,14 @@ export class GameManager{
 		this.stoped = false;
 		this.started = false;
 		this.numOfSpeicalItems  = 1;
-		this.safeMode = false;
-		this.specTileX = specTileX
+		this.safeMode = false; // if the player consuems the spec item then the player cannot lose points if catched
+		this.specTileX = specTileX // for simplicity  I just hard coded this value how ever it should be derived from the map informaiton 
 		this.specTileY = specTileY
 	}
 
-	addGhost(newGhost){	this.ghosts.push(newGhost);}
+
+
+	// getters 
 	getBFSGhost(){return this.bFSGhost}
 	getGreedyGhost(){return this.greadyGhost}
 	getPlayer(){return this.player}
@@ -199,12 +221,12 @@ export class GameManager{
 		console.log(this.timer);
 		//console.log(this.level.getGamePoints());
 	}
-
+	// functions that checks for new visited nodes , as well as the end game states 
 	updateGameStatus(){
 
 		if(this.player.tileX === this.bFSGhost.tileX && this.player.tileY === this.bFSGhost.tileY){
 			if(this.score > 0){
-				this.resetMapBFS();
+				this.resetMapBFS(); // if caught by a bfs ghost 
 			}
 			else{
 				this.endGame();
@@ -213,19 +235,21 @@ export class GameManager{
 		}
 		else if(this.player.tileX === this.greadyGhost.tileX && this.player.tileY === this.greadyGhost.tileY){
 			if(this.score > 0){
-				this.resetMapGreedy();
+				this.resetMapGreedy(); // if caught by the greedy ghost 
 			}
 			else {
 				this.endGame();
 			}
 		}
-
+		// end game condtions 
 		if(this.timer === 0 || this.numOfPonts === 0){this.endGame();}
+		// if we visti an unvisited tile it means that we have consuemd a new point so score +=100
 		if(this.level.map[this.player.getXCords()][this.player.getYCords()].getType() === tilesEnum.not_visited){
 			this.level.map[this.player.getXCords()][this.player.getYCords()].setType(tilesEnum.visitd) ;
 			this.score+=100;
 			this.numOfPonts--;
 		}
+		// if the tile had the spec item then switch the player to the safe mode
 		else if(this.level.map[this.player.getXCords()][this.player.getYCords()].getType() === tilesEnum.speialItem){
 			this.level.map[this.player.getXCords()][this.player.getYCords()].setType(tilesEnum.visitd) ;
 			this.numOfSpeicalItems--;
@@ -238,12 +262,15 @@ export class GameManager{
 	}
 
 	endGame(){
+		// end the game and update the score 
 		this.score = this.score + this.score*this.timer;
 		this.stoped = true;
 	}
 
+	
+	// Desc : resets the BFS Ghost to the center of the map
 	resetMapBFS(){
-		
+	
 		this.bFSGhost.tileX =4 ; this.bFSGhost.tileY = 4; this.bFSGhost.translationX = 450; this.bFSGhost.translationY = 500;
 		if(this.safeMode != true){this.score -= 500;}
 		else {this.safeMode = false}
@@ -252,25 +279,30 @@ export class GameManager{
 
 	}
 
+	//Desc : resets the Greedy Ghost to the center of the map
+
 	resetMapGreedy(){
 		this.greadyGhost.tileX =4 ; this.greadyGhost.tileY = 5; this.greadyGhost.translationX = 450; this.greadyGhost.translationY = 500;
 		this.score -= 500;
 	}
+	
+	// resetGame(map){
+	// 	this.level.map = map 
+	// 	this.score = 0
+	// 	this.timer = 60; 
+	// 	this.player.tileX = 4; 
+	// 	this.player.tileY = 0 ; 
+	// 	this.numOfPonts = 58;
+	// 	this.numOfSpeicalItems = 1;
+	// 	this.player.translationX = 450; 
+	// 	this.player.translationY = 500;
+	// 	this.resetMapGreedy();
+	// 	this.resetMapBFS();
 
-	resetGame(map){
-		this.level.map = map 
-		this.score = 0
-		this.timer = 60; 
-		this.player.tileX = 4; 
-		this.player.tileY = 0 ; 
-		this.numOfPonts = 59;
-		this.player.translationX = 450; 
-		this.player.translationY = 500;
-		this.resetMapGreedy();
-		this.resetMapBFS();
-
-	}
+	// }
 		// console.log(this.level.map[this.player.getXCords()][this.player.getYCords()]); // Debugging line
+
+		// Desc : Based on the movment direction the game manager moves the player and updates the translation value 
 	movePlayer(){
 			if(this.getPlayer().getMovmentDirec() === movmentDirections.up){
 		MoveUp(this.player, this.level.map);
@@ -289,6 +321,8 @@ export class GameManager{
 
 			this.getPlayer().movmentdirection = movmentDirections.stop;
 		}
+
+		// Desc :  Generates the BFS path based on the positon of the BFS Ghost
 
 	bfsMoves(){
 		let startNode = {X:this.bFSGhost.tileX , Y: this.bFSGhost.tileY , action: 0 , parent : null};
@@ -327,7 +361,7 @@ export class GameManager{
 		//}
 	}
 }
-
+	// Sorts the next Valid moves based on the manhatten distance 
 	greadyMoves(){
 
 		let validMoves = new Array() ;
@@ -353,6 +387,7 @@ export class GameManager{
 		return validMoves.sort((a, b) => b.dis - a.dis);
 	}
 
+	// Takes the move based on the shortes distance 
 
 	moveGreedyGhost(){
 		let validmoves = this.greadyMoves();
@@ -383,10 +418,12 @@ export class GameManager{
 
 		
 	}
+
+	//takes the moves based on the path generated by the BFS algorithm
 	moveBFSGhost(){
 		
 			
-		
+		// if we no longer have moves in the path genereted then we need a new path 
 		if(this.bfsGhostmoves.length === 0){
 			this.bfsMoves();
 		}
@@ -429,6 +466,8 @@ export class GameManager{
 
 
 // Controllers 
+
+// The commnad Design pattern is utilized to move the plyayer // To Do // Apply this to every actor 
 
 export function MoveUp(GameActor , map){
 	if  (GameActor.tileY >=9 || map[GameActor.tileX][GameActor.tileY + 1].getType() === tilesEnum.wall  )  {  // To Do change that to the levels cords by passign the level
@@ -491,7 +530,7 @@ export function MoveUp(GameActor , map){
 // ********************************
 
 
-
+// event listeners 
 export function EventListners(gameManager){ 
 	document.addEventListener("keyup",(event)=>{
 		gameManager.getPlayer().canMove = true;
